@@ -1,0 +1,32 @@
+@startuml
+actor Utente
+participant main
+entity DatiCondivisi
+entity Semaforo
+
+Utente -> main ++ : start
+main -> Semaforo ** : new
+main -> DatiCondivisi ** : new
+
+main -> ThDin ** : new
+main -> ThDon ** : new
+main -> ThDan ** : new
+
+main -> Utente : Utente inserisce campana vincente
+Utente -> main : scelta
+
+main -> ThDin ++ : start
+main -> ThDon ++ : start
+main -> ThDan ++ : start
+
+Utente -> main : Viene premuto il tasto invio
+
+
+ThDin -> main -- : interrupt
+ThDon -> main -- : interrupt
+ThDan -> main -- : interrupt
+
+DatiCondivisi -> main : GetContDin,GetContDon,GetContDan
+main -> Utente: risultato
+deactivate main
+@enduml
