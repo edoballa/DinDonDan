@@ -28,31 +28,31 @@ public class CDatiCondivisi {
         contDan = 0;
     }
 
-    public int getContDin() {
+    public synchronized int getContDin() {
         return contDin;
     }
 
-    public void setContDin(int contDin) {
+    public synchronized void setContDin(int contDin) {
         this.contDin = contDin;
     }
 
-    public int getContDon() {
+    public synchronized int getContDon() {
         return contDon;
     }
 
-    public void setContDon(int contDon) {
+    public synchronized void setContDon(int contDon) {
         this.contDon = contDon;
     }
 
-    public int getContDan() {
+    public synchronized int getContDan() {
         return contDan;
     }
 
-    public void setContDan(int contDan) {
+    public synchronized void setContDan(int contDan) {
         this.contDan = contDan;
     }
     
-    public String VisualizzaSchermo() {
+    public synchronized String VisualizzaSchermo() {
        String risultato = "";
        for(int i=0; i<1000; i++) {
            if(schermo[i].equals("")) {
@@ -65,7 +65,7 @@ public class CDatiCondivisi {
        return risultato;
     }
     
-    public void AggiungiStringa(String s) {
+    public synchronized void AggiungiStringa(String s) {
         schermo[primoElem]=s;
         primoElem++;
     }   
