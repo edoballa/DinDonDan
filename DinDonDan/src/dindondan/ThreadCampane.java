@@ -5,89 +5,102 @@
  */
 package dindondan;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** @author Ballabio Edoardo
- * 
- * Classe che collabora con le altre classi ThDin, ThDon e ThDan
+/**
+ *
+ * @author Princess Joy Padua
+ *
+ * @brief Main
+ *
  */
 public class ThreadCampane {
 
-    /**@author Ballabio Edoardo
-     * 
-     * @brief: Metodo che si occupa di far partire il programma permettendo di scegliere se usare lo sleep, lo yield oppure entrambi.
-     * 
-     * In questo metodo si dichiara una variabile String di nome testo e tre thread di nome th1 e th2.
-     * I seguenti thread verrano eseguiti tramite il metodo start() e testo assumerà il valore della stringa inserita dall'utente. 
-     * Le variabili sleep e yield assumeranno il valore di true o false salvato in testo. 
-     * Quando il programma verrà interrotto verranno confrontate le 3 variabili contatrici dei thread (ContDin, ContDan e ContDon).
-     * In base alla scelta del utente e al thread che ha stampato più volte la propria stringa, verrà visualizzata una frase che attesterà la vittoria o la sconfitta dell'utente.
+
+    /**
+     * @brief Main per la gestione dei suoni.
+     *
+     * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
-        Semaforo sem = new Semaforo(1);
-        java.io.BufferedReader console=new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-        String testo;
-        String scelta = "";
-        boolean sleep, yield;
+    public static void main(String[] args) {
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        Scanner scegli = new Scanner(System.in);
+        String interruzione;
+        System.out.println("Per terminare premere un tasto.");
+        /*System.out.println("Scelta 1: solo sleep");
+        System.out.println("Scelta 2: sleep + yield");
+        System.out.println("Scelta 3: solo yield");
+        int scelta=scegli.nextInt();
+         */
         CDatiCondivisi dati = new CDatiCondivisi();
-        try {           
-            sleep = false;
-            yield = true;
-            ThDin th1 = new ThDin(sleep, yield, dati, sem);
-            ThDon th2 = new ThDon(sleep, yield, dati, sem);
-            ThDan th3 = new ThDan(sleep, yield, dati, sem);
-            
-            System.out.println("Inserisci quale campana secondo te suonerà di più");
-            scelta = console.readLine();
-            
+
+        ThSuono th1 = new ThSuono("DIN", 3, dati);
+        ThSuono th2 = new ThSuono("DON", 3, dati);
+        ThSuono th3 = new ThSuono("DAN", 3, dati);
+        ThVisualizza th4=new ThVisualizza(dati);
+        try {
             th1.start();
             th2.start();
             th3.start();
+            th4.start();
             
-            testo = console.readLine();
-            
-            while(!testo.equals("")) {
-                testo = console.readLine();
+            boolean loop = true;
+            while(loop){
+                dati.printSchermo();
+                interruzione = input.readLine();
+
+                if (interruzione.equals("")) {
+                    clearConsole();
+                    loop = false;
+                }
             }
             th1.interrupt();
             th2.interrupt();
             th3.interrupt();
             
-            th1.join();
-            th2.join();
-            th3.join();
-            
-            if(scelta.equals("DIN")) {
-                if((dati.getContDin()>dati.getContDan()) && (dati.getContDin()>dati.getContDon())) {
-                    System.out.println("Hai indovinato!");
-                }
-                else {
-                   System.out.println("Spiacente hai perso");
-                }
+            dati.WaitDIN();
+            dati.WaitDON();
+            dati.WaitDAN();
+            //th1.join();
+            //th2.join();
+            //th3.join();
+            if(ThVisualizza.currentThread().isAlive()) {
+                dati.semVisualizza1Signal();
+                th4.interrupt();
             }
             
-            if(scelta.equals("DON")) {
-                if((dati.getContDon()>dati.getContDin()) && (dati.getContDon()>dati.getContDan())) {
-                    System.out.println("Hai indovinato!");
-                }
-                else {
-                   System.out.println("Spiacente hai perso");
-                }
-            }
             
-            if(scelta.equals("DAN")) {
-                if((dati.getContDan()>dati.getContDin()) && (dati.getContDan()>dati.getContDon())) {
-                    System.out.println("Hai indovinato!");
-                }
-                else {
-                   System.out.println("Spiacente hai perso");
-                }
-            }
+            System.out.println("Qual è il suono che è stato richiamato più volte?");
+            System.out.println("1)DIN");
+            System.out.println("2)DON");
+            System.out.println("3)DAN");
+            int scelta = scegli.nextInt();
+            System.out.println(dati.verificaSeHaiVinto(scelta));
+            System.out.println("DIN:" + dati.getContaDIN());
+            System.out.println("DON:" + dati.getContaDON());
+            System.out.println("DAN:" + dati.getContaDAN());
+            System.out.println("Ci vediamo la prossima volta");
+        } catch (IOException ex) {
+            Logger.getLogger(ThreadCampane.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ThreadCampane.class.getName()).log(Level.SEVERE, null, ex);
         }
-        catch (IOException ex) {
-            Logger.getLogger(ThreadCampane.class.getName()).log(Level.SEVERE, null, ex);       
+    }
+    
+    private static void clearConsole() {
+        //Clears Screen in java
+        try {
+            if (System.getProperty("os.name").contains("Windows")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            } else {
+                Runtime.getRuntime().exec("clear");
+            }
+        } catch (IOException | InterruptedException ex) {
         }
     }
 }
